@@ -1,0 +1,7 @@
+Setup da infraestrutura base com Docker e estrutura de diretórios
+
+- Adição do Dockerfile e docker-compose.yml para isolamento e execução do ambiente.
+- Configuração do gerenciador de dependências Poetry (pyproject.toml) com as bibliotecas cplex e docplex.
+- Criação das pastas para os cinco modelos matemáticos: PFCM, PT, PD, PCM e PFM.
+- Inicialização dos arquivos main.py em branco dentro do diretório de cada modelo.
+- Limpeza e remoção de arquivos temporários de entrada (in.txt) para manter a base limpa.

@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pesquisa-operacional-pli-cplex"
+version = "0.1.0"
+description = "Implementação de modelos clássicos de PLI usando docplex/cplex em Python"
+authors = ["Group <email@example.com>"]
+readme = "Readme.txt"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cplex = "*"
+docplex = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
