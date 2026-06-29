@@ -1,11 +1,9 @@
-version: '3.8'
-
-services:
+﻿services:
   app:
     build: .
     container_name: po_pli_cplex
     volumes:
       - .:/app
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
+    stdin_open: true
+    tty: true
     command: bash
