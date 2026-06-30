@@ -1,22 +1,19 @@
-from pathlib import Path
-import sys
+﻿from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-from comum.entrada import ler_dados_entrada
 from entrada import ler_entrada
 from modelagem import montar_modelo
 from saida import imprimir_dados, imprimir_resultado
 
 
 def main() -> None:
-    dados = ler_dados_entrada(ler_entrada)
+    conteudo = Path(__file__).with_name("in.txt").read_text()
+    dados = ler_entrada(conteudo)
 
     imprimir_dados(dados)
     modelo, quantidades = montar_modelo(dados)
     solucao = modelo.solve(log_output=False)
-    imprimir_resultado(modelo, solucao, dados, quantidades)
+    imprimir_resultado(solucao, dados, quantidades)
 
 
 if __name__ == "__main__":
     main()
-

@@ -1,10 +1,5 @@
 from docplex.mp.model import Model
 
-from comum.modelagem import (
-    criar_fluxos_por_aresta,
-    criar_modelo,
-    fluxo_saida_menos_entrada,
-)
 from entrada import Aresta
 
 
@@ -13,17 +8,36 @@ def montar_modelo(
     saldos: list[int],
     arestas: list[Aresta],
 ) -> tuple[Model, list]:
-    modelo = criar_modelo("PFCM")
-    fluxos = criar_fluxos_por_aresta(modelo, arestas)
+    modelo = Model(name="PFCM")
 
+    # Variavel x_ij: quantidade de fluxo enviada em cada aresta i -> j.
+    # O limite superior e a capacidade maxima da propria aresta.
+    fluxos = [
+        modelo.integer_var(
+            lb=0,
+            ub=aresta.capacidade,
+            name=f"x_{aresta.origem}_{aresta.destino}_{indice}",
+        )
+        for indice, aresta in enumerate(arestas, start=1)
+    ]
+
+    # Objetivo: minimizar o custo total do fluxo enviado pela rede.
     modelo.minimize(
         modelo.sum(aresta.custo * fluxo for aresta, fluxo in zip(arestas, fluxos))
     )
 
+    # Balanco de fluxo em cada vertice:
+    # saida - entrada = saldo.
+    # Saldo positivo representa oferta; saldo negativo representa demanda.
     for vertice in range(1, numero_vertices + 1):
+        saida = modelo.sum(
+            fluxo for aresta, fluxo in zip(arestas, fluxos) if aresta.origem == vertice
+        )
+        entrada = modelo.sum(
+            fluxo for aresta, fluxo in zip(arestas, fluxos) if aresta.destino == vertice
+        )
         modelo.add_constraint(
-            fluxo_saida_menos_entrada(modelo, arestas, fluxos, vertice)
-            == saldos[vertice - 1],
+            saida - entrada == saldos[vertice - 1],
             ctname=f"balanco_vertice_{vertice}",
         )
 

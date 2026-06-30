@@ -1,45 +1,47 @@
-# PT - Problema do Transporte
+﻿# PT - Problema do Transporte
 
 ## O que e
 
-O Problema do Transporte busca distribuir produtos de origens para destinos com o menor custo total.
+O Problema do Transporte busca distribuir produtos de origens para destinos com o menor custo possivel.
 
-Cada origem possui uma oferta. Cada destino possui uma demanda. Cada rota entre origem e destino possui um custo unitario.
+No nosso exemplo:
+
+- Cada origem possui uma oferta.
+- Cada destino possui uma demanda.
+- Cada rota origem-destino possui um custo unitario.
+- A soma das ofertas deve atender a soma das demandas.
 
 ## Como resolvemos
 
-Modelamos o problema como uma PLI com matriz de custos.
+O codigo monta uma PLI e deixa o CPLEX resolver.
 
-Variavel de decisao:
+A modelagem usada e:
 
-- `x_ij`: quantidade inteira transportada da origem `i` para o destino `j`.
+- Variavel de decisao: quantidade enviada de cada origem para cada destino.
+- Objetivo: minimizar o custo total de transporte.
+- Restricoes: cada origem envia sua oferta e cada destino recebe sua demanda.
 
-Funcao objetivo:
+Cada par origem-destino vira uma variavel inteira:
 
-- Minimizar a soma do custo de cada rota multiplicado pela quantidade transportada nela.
+```python
+x_origem_destino
+```
 
-Restricoes:
+Por exemplo, `x_1_2` representa quanto sera enviado da origem `1` para o destino `2`.
 
-- Cada origem deve enviar exatamente sua oferta.
-- Cada destino deve receber exatamente sua demanda.
-- As quantidades transportadas sao inteiras e nao negativas.
+## Entrada
 
-## Fluxo da resolucao
-
-1. `main.py` recebe o arquivo de entrada.
-2. `entrada.py` le ofertas, demandas e matriz de custos.
-3. `entrada.py` valida os tamanhos das listas, o equilibrio entre oferta e demanda e os custos.
-4. `modelagem.py` cria uma variavel de quantidade para cada par origem-destino.
-5. `modelagem.py` monta a funcao objetivo e as restricoes de oferta e demanda.
-6. O CPLEX resolve o modelo minimizando o custo total.
-7. `saida.py` imprime os dados lidos, o custo minimo e os transportes realizados.
-
-## Formato do arquivo `in.txt`
+O programa sempre le o arquivo fixo:
 
 ```txt
-O D
-oferta_1 ... oferta_O
-demanda_1 ... demanda_D
+PT/in.txt
+```
+
+Formato:
+
+```txt
+oferta_1 oferta_2 ... oferta_O
+demanda_1 demanda_2 ... demanda_D
 custos_da_origem_1
 ...
 custos_da_origem_O
@@ -47,16 +49,63 @@ custos_da_origem_O
 
 Onde:
 
-- `O`: numero de origens.
-- `D`: numero de destinos.
-- A segunda linha informa as ofertas.
-- A terceira linha informa as demandas.
+- A primeira linha informa as ofertas.
+- A segunda linha informa as demandas.
 - As linhas seguintes formam a matriz de custos.
+- Cada linha da matriz representa uma origem.
+- Cada coluna da matriz representa um destino.
 
-A soma das ofertas deve ser igual a soma das demandas.
+## Fluxo do codigo
+
+1. `main.py` le `PT/in.txt`.
+2. `entrada.py` transforma ofertas, demandas e custos em dados Python.
+3. `modelagem.py` cria uma variavel para cada rota origem-destino.
+4. `modelagem.py` minimiza o custo total.
+5. `modelagem.py` adiciona as restricoes de oferta.
+6. `modelagem.py` adiciona as restricoes de demanda.
+7. O CPLEX resolve o modelo.
+8. `saida.py` mostra os transportes realizados e o custo minimo.
+
+## Modelagem
+
+Para cada origem:
+
+```txt
+soma do que ela envia = oferta da origem
+```
+
+Para cada destino:
+
+```txt
+soma do que ele recebe = demanda do destino
+```
+
+A funcao objetivo e:
+
+```txt
+minimizar soma(custo da rota * quantidade transportada)
+```
+
+## Resultado esperado
+
+O exemplo vem dos slides do professor.
+
+Valor otimo esperado para comparar com o LINGO:
+
+```txt
+1330
+```
 
 ## Execucao
 
+Com Docker:
+
 ```bash
-docker compose run --rm app python PT/main.py PT/in.txt
+docker compose run --rm app python PT/main.py
+```
+
+Sem Docker:
+
+```bash
+python PT/main.py
 ```

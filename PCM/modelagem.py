@@ -1,10 +1,5 @@
 from docplex.mp.model import Model
 
-from comum.modelagem import (
-    criar_escolhas_por_aresta,
-    criar_modelo,
-    fluxo_saida_menos_entrada,
-)
 from entrada import Aresta
 
 
@@ -14,14 +9,33 @@ def montar_modelo(
     destino_caminho: int,
     arestas: list[Aresta],
 ) -> tuple[Model, list]:
-    modelo = criar_modelo("PCM")
-    escolhas = criar_escolhas_por_aresta(modelo, arestas)
+    modelo = Model(name="PCM")
 
+    # Variavel x_ij: 1 se a aresta i -> j fizer parte do caminho; 0 caso contrario.
+    escolhas = [
+        modelo.binary_var(name=f"x_{aresta.origem}_{aresta.destino}_{indice}")
+        for indice, aresta in enumerate(arestas, start=1)
+    ]
+
+    # Objetivo: minimizar o custo total das arestas escolhidas.
     modelo.minimize(
         modelo.sum(aresta.custo * escolha for aresta, escolha in zip(arestas, escolhas))
     )
 
+    # Balanco do caminho:
+    # origem tem saida liquida 1, destino tem entrada liquida 1,
+    # e os demais vertices conservam fluxo.
     for vertice in range(1, numero_vertices + 1):
+        saida = modelo.sum(
+            escolha
+            for aresta, escolha in zip(arestas, escolhas)
+            if aresta.origem == vertice
+        )
+        entrada = modelo.sum(
+            escolha
+            for aresta, escolha in zip(arestas, escolhas)
+            if aresta.destino == vertice
+        )
         balanco = (
             1
             if vertice == origem_caminho
@@ -30,7 +44,7 @@ def montar_modelo(
             else 0
         )
         modelo.add_constraint(
-            fluxo_saida_menos_entrada(modelo, arestas, escolhas, vertice) == balanco,
+            saida - entrada == balanco,
             ctname=f"balanco_vertice_{vertice}",
         )
 

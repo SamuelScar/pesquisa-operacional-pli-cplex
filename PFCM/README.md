@@ -1,43 +1,46 @@
-# PFCM - Problema de Fluxo de Custo Minimo
+﻿# PFCM - Problema de Fluxo de Custo Minimo
 
 ## O que e
 
-O Problema de Fluxo de Custo Minimo busca enviar fluxo por uma rede com o menor custo possivel.
+O Problema de Fluxo de Custo Minimo busca enviar unidades por uma rede pagando o menor custo possivel.
 
-Cada vertice pode representar uma oferta, uma demanda ou um ponto de transbordo. Cada aresta possui custo unitario e capacidade maxima.
+No nosso exemplo, a rede tem:
+
+- Vertices com oferta, que precisam enviar fluxo.
+- Vertices com demanda, que precisam receber fluxo.
+- Vertices de transbordo, que apenas recebem e repassam fluxo.
+- Arestas direcionadas, cada uma com custo e capacidade maxima.
 
 ## Como resolvemos
 
-Modelamos o problema como uma PLI em um grafo direcionado.
+O codigo nao implementa Simplex manualmente. Ele monta o modelo matematico e deixa o CPLEX resolver.
 
-Variavel de decisao:
+A modelagem usada e:
 
-- `x_ij`: quantidade inteira de fluxo enviada pela aresta `i -> j`.
+- Variavel de decisao: fluxo enviado em cada aresta.
+- Objetivo: minimizar o custo total do fluxo.
+- Restricoes: respeitar o saldo de cada vertice e a capacidade das arestas.
 
-Funcao objetivo:
+Cada aresta vira uma variavel inteira:
 
-- Minimizar a soma do custo de cada aresta multiplicado pelo fluxo enviado nela.
+```python
+x_origem_destino_indice
+```
 
-Restricoes:
+Por exemplo, `x_2_3_1` representa o fluxo enviado pela aresta `2 -> 3`.
 
-- O balanco de cada vertice deve respeitar seu saldo.
-- O fluxo de cada aresta deve ficar entre zero e sua capacidade maxima.
-- As variaveis de fluxo sao inteiras.
+## Entrada
 
-## Fluxo da resolucao
-
-1. `main.py` recebe o arquivo de entrada.
-2. `entrada.py` le os vertices, saldos e arestas.
-3. `entrada.py` valida a quantidade de saldos, a soma dos saldos, os vertices e as capacidades.
-4. `modelagem.py` cria as variaveis de fluxo e monta a funcao objetivo.
-5. `modelagem.py` adiciona as restricoes de balanco de fluxo em cada vertice.
-6. O CPLEX resolve o modelo.
-7. `saida.py` imprime os dados lidos, os fluxos e o valor da funcao objetivo.
-
-## Formato do arquivo `in.txt`
+O programa sempre le o arquivo fixo:
 
 ```txt
-N M
+PFCM/in.txt
+```
+
+Formato:
+
+```txt
+N
 b1 b2 ... bN
 origem destino custo capacidade
 ...
@@ -45,18 +48,74 @@ origem destino custo capacidade
 
 Onde:
 
-- `N`: numero de vertices.
-- `M`: numero de arestas.
-- `b`: saldo de cada vertice.
-- Saldo positivo representa oferta.
-- Saldo negativo representa demanda.
-- Saldo zero representa vertice de transbordo.
-- Cada aresta possui origem, destino, custo unitario e capacidade maxima.
+- `N`: quantidade de vertices.
+- `b1 b2 ... bN`: saldo de cada vertice.
+- Saldo positivo: oferta.
+- Saldo negativo: demanda.
+- Saldo zero: transbordo.
+- Cada linha seguinte representa uma aresta.
 
-A soma dos saldos deve ser zero.
+Exemplo:
+
+```txt
+2 3 2 30
+```
+
+Significa uma aresta `2 -> 3`, com custo `2` e capacidade `30`.
+
+## Fluxo do codigo
+
+1. `main.py` le `PFCM/in.txt`.
+2. `entrada.py` transforma o texto em dados Python.
+3. `modelagem.py` cria o modelo do CPLEX.
+4. `modelagem.py` cria uma variavel para cada aresta.
+5. `modelagem.py` minimiza o custo total.
+6. `modelagem.py` adiciona o balanco de cada vertice.
+7. O CPLEX resolve o modelo.
+8. `saida.py` mostra os fluxos positivos e o custo minimo.
+
+## Modelagem
+
+Para cada vertice:
+
+```txt
+fluxo que sai - fluxo que entra = saldo do vertice
+```
+
+Entao:
+
+- Vertice de oferta precisa enviar mais do que recebe.
+- Vertice de demanda precisa receber mais do que envia.
+- Vertice de transbordo precisa enviar tudo que recebe.
+
+A funcao objetivo e:
+
+```txt
+minimizar soma(custo da aresta * fluxo da aresta)
+```
+
+As capacidades entram diretamente no limite superior das variaveis.
+
+## Resultado esperado
+
+O exemplo vem dos slides do professor.
+
+Valor otimo esperado para comparar com o LINGO:
+
+```txt
+184
+```
 
 ## Execucao
 
+Com Docker:
+
 ```bash
-docker compose run --rm app python PFCM/main.py PFCM/in.txt
+docker compose run --rm app python PFCM/main.py
+```
+
+Sem Docker:
+
+```bash
+python PFCM/main.py
 ```

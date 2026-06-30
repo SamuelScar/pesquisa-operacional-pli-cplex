@@ -1,10 +1,5 @@
 from docplex.mp.model import Model
 
-from comum.modelagem import (
-    criar_fluxos_por_aresta,
-    criar_modelo,
-    fluxo_saida_menos_entrada,
-)
 from entrada import Aresta
 
 
@@ -14,13 +9,34 @@ def montar_modelo(
     destino_fluxo: int,
     arestas: list[Aresta],
 ) -> tuple[Model, list, object]:
-    modelo = criar_modelo("PFM")
-    fluxo_maximo = modelo.integer_var(lb=0, name="fluxo_maximo")
-    fluxos = criar_fluxos_por_aresta(modelo, arestas)
+    modelo = Model(name="PFM")
 
+    # Variavel F: valor total de fluxo enviado da origem ao destino.
+    fluxo_maximo = modelo.integer_var(lb=0, name="fluxo_maximo")
+
+    # Variavel x_ij: quantidade de fluxo enviada em cada aresta i -> j.
+    # O limite superior e a capacidade maxima da propria aresta.
+    fluxos = [
+        modelo.integer_var(
+            lb=0,
+            ub=aresta.capacidade,
+            name=f"x_{aresta.origem}_{aresta.destino}_{indice}",
+        )
+        for indice, aresta in enumerate(arestas, start=1)
+    ]
+
+    # Objetivo: maximizar o fluxo total que sai da origem e chega ao destino.
     modelo.maximize(fluxo_maximo)
 
+    # Balanco de fluxo:
+    # origem gera F, destino consome F, e os demais vertices conservam fluxo.
     for vertice in range(1, numero_vertices + 1):
+        saida = modelo.sum(
+            fluxo for aresta, fluxo in zip(arestas, fluxos) if aresta.origem == vertice
+        )
+        entrada = modelo.sum(
+            fluxo for aresta, fluxo in zip(arestas, fluxos) if aresta.destino == vertice
+        )
         balanco = (
             fluxo_maximo
             if vertice == origem_fluxo
@@ -29,7 +45,7 @@ def montar_modelo(
             else 0
         )
         modelo.add_constraint(
-            fluxo_saida_menos_entrada(modelo, arestas, fluxos, vertice) == balanco,
+            saida - entrada == balanco,
             ctname=f"balanco_vertice_{vertice}",
         )
 

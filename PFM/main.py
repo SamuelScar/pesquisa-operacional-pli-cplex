@@ -1,17 +1,13 @@
-from pathlib import Path
-import sys
+﻿from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-from comum.entrada import ler_dados_entrada
 from entrada import ler_entrada
 from modelagem import montar_modelo
 from saida import imprimir_dados, imprimir_resultado
 
 
 def main() -> None:
-    numero_vertices, origem_fluxo, destino_fluxo, arestas = ler_dados_entrada(
-        ler_entrada
-    )
+    conteudo = Path(__file__).with_name("in.txt").read_text()
+    numero_vertices, origem_fluxo, destino_fluxo, arestas = ler_entrada(conteudo)
 
     imprimir_dados(numero_vertices, origem_fluxo, destino_fluxo, arestas)
     modelo, fluxos, fluxo_maximo = montar_modelo(
@@ -21,9 +17,8 @@ def main() -> None:
         arestas,
     )
     solucao = modelo.solve(log_output=False)
-    imprimir_resultado(modelo, solucao, fluxo_maximo, fluxos, arestas)
+    imprimir_resultado(solucao, fluxo_maximo, fluxos, arestas)
 
 
 if __name__ == "__main__":
     main()
-

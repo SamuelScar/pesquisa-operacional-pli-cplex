@@ -10,48 +10,55 @@ O projeto resolve cinco problemas:
 - `PT`: Problema do Transporte.
 - `PD`: Problema da Designacao.
 
+## Premissa das entradas
+
+Cada problema possui um arquivo fixo chamado `in.txt` dentro da propria pasta.
+
+O codigo assume que esse arquivo ja esta correto e segue exatamente a estrutura esperada. Por isso, os leitores de entrada apenas convertem o conteudo do arquivo para estruturas em Python, sem validacoes adicionais.
+
+Para testar outro caso, altere o `in.txt` da pasta do problema.
+
 ## Estrutura
 
 Cada problema fica em sua propria pasta e segue a mesma divisao:
 
-- `entrada.py`: le e valida os dados de entrada.
+- `entrada.py`: le o `in.txt` e converte os dados para Python.
 - `modelagem.py`: monta o modelo matematico no Docplex.
 - `saida.py`: imprime os dados lidos e o resultado da solucao.
-- `main.py`: organiza o fluxo de execucao.
-- `in.txt`: exemplo de entrada para o problema.
+- `main.py`: le o `in.txt`, monta o modelo, chama o CPLEX e imprime a saida.
+- `in.txt`: entrada fixa do problema.
 - `README.md`: explica o problema e a modelagem usada.
 
-A pasta `comum` guarda apenas funcoes reutilizadas por mais de um problema.
 
 ## Como executar
 
-Use Docker para executar os modelos. O comando sempre recebe o `main.py` do problema e o arquivo de entrada.
+Use Docker para executar os modelos.
 
 Formato geral:
 
 ```bash
-docker compose run --rm app python <problema>/main.py <problema>/in.txt
-```
-
-Exemplo:
-
-```bash
-docker compose run --rm app python PFCM/main.py PFCM/in.txt
+docker compose run --rm app python <problema>/main.py
 ```
 
 Comandos por problema:
 
 ```bash
-docker compose run --rm app python PFCM/main.py PFCM/in.txt
-docker compose run --rm app python PFM/main.py PFM/in.txt
-docker compose run --rm app python PCM/main.py PCM/in.txt
-docker compose run --rm app python PT/main.py PT/in.txt
-docker compose run --rm app python PD/main.py PD/in.txt
+docker compose run --rm app python PFCM/main.py
+docker compose run --rm app python PFM/main.py
+docker compose run --rm app python PCM/main.py
+docker compose run --rm app python PT/main.py
+docker compose run --rm app python PD/main.py
 ```
 
-## Entradas
+## Comparacao com LINGO
 
-Cada pasta possui um `in.txt` com um exemplo de entrada. Para testar outro caso, altere esse arquivo ou passe outro caminho no comando.
+Os arquivos `in.txt` foram ajustados para os exemplos dos slides. Os valores otimos esperados para comparacao sao:
+
+- `PFCM`: 184.
+- `PT`: 1330.
+- `PD`: 96.
+- `PCM`: 22.
+- `PFM`: 19.
 
 ## Limite do CPLEX Community
 
