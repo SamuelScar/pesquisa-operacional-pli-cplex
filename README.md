@@ -1,4 +1,4 @@
-# Pesquisa Operacional - PLI
+﻿# Pesquisa Operacional - PLI
 
 Implementacao em Python de modelos classicos de Programacao Linear Inteira usando Docplex e CPLEX.
 
@@ -10,58 +10,40 @@ O projeto resolve cinco problemas:
 - `PT`: Problema do Transporte.
 - `PD`: Problema da Designacao.
 
-## Premissa das entradas
-
-Cada problema possui um arquivo fixo chamado `in.txt` dentro da propria pasta.
-
-O codigo assume que esse arquivo ja esta correto e segue exatamente a estrutura esperada. Por isso, os leitores de entrada apenas convertem o conteudo do arquivo para estruturas em Python, sem validacoes adicionais.
-
-Para testar outro caso, altere o `in.txt` da pasta do problema.
+Cada pasta possui seu proprio `README.md` com a explicacao do problema, entrada, modelagem e resultado esperado para comparacao com o LINGO.
 
 ## Estrutura
 
-Cada problema fica em sua propria pasta e segue a mesma divisao:
+Cada problema segue a mesma organizacao:
 
-- `entrada.py`: le o `in.txt` e converte os dados para Python.
-- `modelagem.py`: monta o modelo matematico no Docplex.
-- `saida.py`: imprime os dados lidos e o resultado da solucao.
-- `main.py`: le o `in.txt`, monta o modelo, chama o CPLEX e imprime a saida.
-- `in.txt`: entrada fixa do problema.
-- `README.md`: explica o problema e a modelagem usada.
+- `entrada.py`: le o `in.txt` da propria pasta.
+- `modelagem.py`: monta o modelo no Docplex.
+- `saida.py`: imprime o resultado de forma resumida.
+- `main.py`: organiza a execucao.
+- `in.txt`: entrada fixa usada no exemplo.
 
+O codigo assume que os arquivos `in.txt` estao corretos e prontos para uso, sem validacoes extras de leitura.
 
 ## Como executar
 
-Use Docker para executar os modelos.
-
-Formato geral:
+Use Docker na raiz do projeto. O `--build` prepara a imagem com as dependencias antes de executar:
 
 ```bash
-docker compose run --rm app python <problema>/main.py
+docker compose run --rm --build app python <problema>/main.py
 ```
 
-Comandos por problema:
+Exemplos:
 
 ```bash
-docker compose run --rm app python PFCM/main.py
-docker compose run --rm app python PFM/main.py
-docker compose run --rm app python PCM/main.py
-docker compose run --rm app python PT/main.py
-docker compose run --rm app python PD/main.py
+docker compose run --rm --build app python PFCM/main.py
+docker compose run --rm --build app python PFM/main.py
+docker compose run --rm --build app python PCM/main.py
+docker compose run --rm --build app python PT/main.py
+docker compose run --rm --build app python PD/main.py
 ```
 
-## Comparacao com LINGO
-
-Os arquivos `in.txt` foram ajustados para os exemplos dos slides. Os valores otimos esperados para comparacao sao:
-
-- `PFCM`: 184.
-- `PT`: 1330.
-- `PD`: 96.
-- `PCM`: 22.
-- `PFM`: 19.
-
-## Limite do CPLEX Community
+## Observacao
 
 A versao Community do CPLEX possui limite de 1000 variaveis e 1000 restricoes.
 
-Nos modelos de grafo, cada aresta normalmente gera uma variavel, entao entradas muito grandes podem ultrapassar esse limite.
+

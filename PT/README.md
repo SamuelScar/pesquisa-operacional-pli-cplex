@@ -101,7 +101,7 @@ Valor otimo esperado para comparar com o LINGO:
 Com Docker:
 
 ```bash
-docker compose run --rm app python PT/main.py
+docker compose run --rm --build app python PT/main.py
 ```
 
 Sem Docker:
@@ -109,3 +109,4 @@ Sem Docker:
 ```bash
 python PT/main.py
 ```
+
